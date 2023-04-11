@@ -19,6 +19,13 @@ public class Paddle : MonoBehaviour
         else if (pos.x < -MaxMovement)
             pos.x = -MaxMovement;
 
-        transform.position = pos;
+        if (MainManager.Instance.DevCheat)
+        {
+            transform.position = new Vector3(MainManager.Instance.Ball.transform.position.x, transform.position.y, transform.position.z);
+        }
+        else
+        {
+            transform.position = pos;
+        }
     }
 }

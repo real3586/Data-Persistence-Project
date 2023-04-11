@@ -38,6 +38,7 @@ public class MainManager : MonoBehaviour
 
     int[] color = new[] { 1, 1, 2, 2, 5, 5 };
     #endregion
+    public bool DevCheat = false;
 
     private void Start()
     {
@@ -52,6 +53,7 @@ public class MainManager : MonoBehaviour
         {
             ManageInstance();
             AssignMissing();
+            TextManage();
             data = new Save();
             data.LoadData();
             StartCoroutine(GameSequence());
@@ -59,6 +61,7 @@ public class MainManager : MonoBehaviour
         else
         {
             data.SaveData();
+            playerName = "Anonymous";
         }
     }
     void ManageInstance()
@@ -99,7 +102,7 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = color[i];
             }
         }
-        // Set the ball in motion.
+        // puts ball above paddle
         Ball.SetActive(true);
         BallRig.isKinematic = true;
         Ball.transform.position = paddle.transform.position + new Vector3(0, 0.2f, 0);
@@ -107,14 +110,13 @@ public class MainManager : MonoBehaviour
     }
     IEnumerator GameSequence()
     {
-        GameOverText.text = " ";
-
         // start when pressing space bar
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
         m_Points = 0;
         ScoreText.text = $"Score : {m_Points}";
         StartGame();
 
+        // ball in motion
         float randomDirection = Random.Range(-1.0f, 1.0f);
         Vector3 forceDir = new Vector3(randomDirection, 1, 0);
         forceDir.Normalize();
@@ -122,14 +124,17 @@ public class MainManager : MonoBehaviour
         BallRig.isKinematic = false;
         BallRig.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
 
+        // wait until game is over
+        while (m_Points != 96 || m_GameOver)
+        {
+            yield return null;
+        }
         if (m_Points == 96)
         {
-            Debug.Log("winner");
+            Ball.SetActive(false);
+            BallRig.isKinematic = true;
             GameOver(true);
         }
-        
-        // wait until game is over
-        yield return new WaitUntil(() => m_GameOver);
         
         highScoreCompare = m_Points;
         for (int i = bricks.transform.childCount - 1; i >= 0; i--)
@@ -142,13 +147,14 @@ public class MainManager : MonoBehaviour
         
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
         m_GameOver = false;
+        GameOverText.text = " ";
 
         StartCoroutine(GameSequence());
         yield return null;
     }
     public void HighScore(int compare)
     {
-        if (highScore < compare)
+        if (highScore <= compare)
         {
             highScore = compare;
             highScoreName = playerName;
@@ -184,11 +190,12 @@ public class MainManager : MonoBehaviour
         HighScoreAndName = GameObject.Find("High Score and Name").GetComponent<Text>();
         NameText = GameObject.Find("NameText").GetComponent<Text>();
         bricks = GameObject.Find("Bricks");
+    }
+    private void TextManage()
+    {
+        playerName = playerName == "PLSDevCheat" ? "hAcKeR" : playerName;
+        playerName = string.IsNullOrEmpty(playerName) ? "Anonymous" : playerName;
 
-        if (string.IsNullOrEmpty(playerName))
-        {
-            playerName = "Anonymous";
-        }
         NameText.text = "Name: " + playerName;
         GameOverText.text = "";
     }
