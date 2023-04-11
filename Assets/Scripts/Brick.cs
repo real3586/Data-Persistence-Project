@@ -5,13 +5,14 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class Brick : MonoBehaviour
-{
-    public UnityEvent<int> onDestroyed;
-    
+{    
     public int PointValue;
+    public GameObject Bricks;
 
     void Start()
     {
+        Bricks = GameObject.Find("Bricks");
+        gameObject.transform.SetParent(Bricks.transform);
         var renderer = GetComponentInChildren<Renderer>();
 
         MaterialPropertyBlock block = new MaterialPropertyBlock();
@@ -34,10 +35,13 @@ public class Brick : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision other)
-    {
-        onDestroyed.Invoke(PointValue);
-        
+    {        
         //slight delay to be sure the ball have time to bounce
         Destroy(gameObject, 0.2f);
+    }
+    private void OnDestroy()
+    {
+        if (!MainManager.Instance.m_GameOver)
+        MainManager.Instance.AddPoint(PointValue);
     }
 }
