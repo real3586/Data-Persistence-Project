@@ -13,6 +13,7 @@ public class DeathZone : MonoBehaviour
     }
     private void OnCollisionEnter(Collision other)
     {
+        other.gameObject.GetComponent<Rigidbody>().isKinematic = true;
         other.gameObject.SetActive(false);
         Manager.GameOver(false);
     }

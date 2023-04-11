@@ -125,17 +125,19 @@ public class MainManager : MonoBehaviour
         BallRig.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
 
         // wait until game is over
-        while (m_Points != 96 || m_GameOver)
-        {
-            yield return null;
-        }
+        yield return new WaitUntil(() => m_Points == 96 || m_GameOver);
+        StartCoroutine(GameOverSequence());
+    }
+    IEnumerator GameOverSequence()
+    {
         if (m_Points == 96)
         {
-            Ball.SetActive(false);
+            // freeze ball and also hide it
             BallRig.isKinematic = true;
+            Ball.SetActive(false);
             GameOver(true);
         }
-        
+
         highScoreCompare = m_Points;
         for (int i = bricks.transform.childCount - 1; i >= 0; i--)
         {
@@ -144,7 +146,6 @@ public class MainManager : MonoBehaviour
         HighScore(highScoreCompare);
 
         // wait for spacebar and then start another game
-        
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
         m_GameOver = false;
         GameOverText.text = " ";
