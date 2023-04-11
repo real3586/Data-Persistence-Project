@@ -14,6 +14,6 @@ public class DeathZone : MonoBehaviour
     private void OnCollisionEnter(Collision other)
     {
         other.gameObject.SetActive(false);
-        Manager.GameOver();
+        Manager.GameOver(false);
     }
 }

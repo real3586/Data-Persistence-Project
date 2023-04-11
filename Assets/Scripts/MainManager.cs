@@ -56,6 +56,10 @@ public class MainManager : MonoBehaviour
             data.LoadData();
             StartCoroutine(GameSequence());
         }
+        else
+        {
+            data.SaveData();
+        }
     }
     void ManageInstance()
     {
@@ -76,6 +80,12 @@ public class MainManager : MonoBehaviour
     }
     private void StartGame()
     {
+        // destroy remaining bricks
+        for (int i = bricks.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(bricks.transform.GetChild(i).gameObject);
+        }
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
 
@@ -114,8 +124,8 @@ public class MainManager : MonoBehaviour
 
         if (m_Points == 96)
         {
-            // you win the game
-            m_GameOver = true;
+            Debug.Log("winner");
+            GameOver(true);
         }
         
         // wait until game is over
@@ -153,10 +163,10 @@ public class MainManager : MonoBehaviour
         }
         HighScoreAndName.text = "High Score: " + highScore + "  Name: " + highScoreName;
     }
-    public void GameOver()
+    public void GameOver(bool win)
     {
+        GameOverText.text = win ? "YOU WIN\nPress Space to Restart" : "GAME OVER\nPress Space to Restart:";
         m_GameOver = true;
-        GameOverText.text = "GAME OVER\nPress Space to Restart:";
     }
     public void AddPoint(int point)
     {
@@ -175,7 +185,6 @@ public class MainManager : MonoBehaviour
         NameText = GameObject.Find("NameText").GetComponent<Text>();
         bricks = GameObject.Find("Bricks");
 
-        HighScoreAndName.text = "High Score: " + highScore + "  from: " + highScoreName;
         if (string.IsNullOrEmpty(playerName))
         {
             playerName = "Anonymous";
@@ -185,12 +194,12 @@ public class MainManager : MonoBehaviour
     }
     [System.Serializable] public class Save
     {
-        public string saveName;
+        public string saveHighName;
         public int saveHighScore;
         public void SaveData()
         {
             Save data = new Save();
-            data.saveName = Instance.playerName;
+            data.saveHighName = Instance.highScoreName;
             data.saveHighScore = Instance.highScore;
 
             string json = JsonUtility.ToJson(data);
@@ -205,13 +214,17 @@ public class MainManager : MonoBehaviour
                 string json = File.ReadAllText(path);
                 Save data = JsonUtility.FromJson<Save>(json);
 
-                Instance.highScoreName = data.saveName;
                 Instance.highScore = data.saveHighScore;
+                if (string.IsNullOrEmpty(data.saveHighName) || data.saveHighName == "Anonymous")
+                {
+                    Instance.highScoreName = "Anonymous";
+                }
+                else
+                {
+                    Instance.highScoreName = data.saveHighName;
+                }
             }
-            if (string.IsNullOrEmpty(Instance.highScoreName))
-            {
-                Instance.highScoreName = "Anonymous";
-            }
+            Instance.HighScoreAndName.text = "High Score: " + Instance.highScore + "  from: " + Instance.highScoreName;
         }
     }
 }

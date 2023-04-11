@@ -5,11 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class MainUI : MonoBehaviour
 {
-
-
     public void ExitToMenu()
     {
-        //MainManager.Instance
         SceneManager.LoadScene(0);
     }
 }
