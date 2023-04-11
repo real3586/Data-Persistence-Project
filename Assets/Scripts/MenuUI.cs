@@ -22,10 +22,6 @@ public class MenuUI : MonoBehaviour
         {
             userName = "Anonymous";
         }
-        else if (userName == "PLSDevCheat")
-        {
-            MainManager.Instance.DevCheat = true;
-        }
         MainManager.Instance.playerName = userName;
     }
     public void QuitGame()

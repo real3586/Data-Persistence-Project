@@ -193,7 +193,13 @@ public class MainManager : MonoBehaviour
     }
     private void TextManage()
     {
+        // changes PLSDevCheat to hAcKeR
         playerName = playerName == "PLSDevCheat" ? "hAcKeR" : playerName;
+
+        // turns on or off DevCheat depending on name
+        DevCheat = playerName == "hAcKeR" ? true : false;
+
+        // changes to Anon if there is no name
         playerName = string.IsNullOrEmpty(playerName) ? "Anonymous" : playerName;
 
         NameText.text = "Name: " + playerName;
