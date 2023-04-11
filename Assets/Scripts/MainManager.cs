@@ -6,8 +6,6 @@ using UnityEngine.UI;
 using System.IO;
 using UnityEditor;
 using TMPro;
-using UnityEngine.SocialPlatforms.Impl;
-using static UnityEngine.Rendering.DebugUI;
 
 public class MainManager : MonoBehaviour
 {
@@ -40,103 +38,11 @@ public class MainManager : MonoBehaviour
 
     int[] color = new[] { 1, 1, 2, 2, 5, 5 };
     #endregion
-    private void Awake()
+
+    private void Start()
     {
         SceneManager.activeSceneChanged += OnSceneChanged;
         ManageInstance();
-    }
-    private void StartGame()
-    {
-        const float step = 0.6f;
-        int perLine = Mathf.FloorToInt(4.0f / step);
-
-        // place all the bricks
-        for (int i = 0; i < LineCount; ++i)
-        {
-            for (int x = 0; x < perLine; ++x)
-            {
-                Vector3 position = new Vector3(-1.5f + step * x, 2.5f + i * 0.3f, 0);
-                var brick = Instantiate(BrickPrefab, position, Quaternion.identity);
-                brick.PointValue = color[i];
-            }
-        }
-        // Set the ball in motion.
-        Ball.SetActive(true);
-        BallRig.isKinematic = true;
-        Ball.transform.position = paddle.transform.position + new Vector3(0, 0.2f, 0);
-        Ball.transform.SetParent(paddle.transform);
-    }
-    IEnumerator GameSequence()
-    {
-        GameOverText.text = "";
-
-        // start when pressing space bar
-        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-
-        m_Points = 0;
-        ScoreText.text = $"Score : {m_Points}";
-        StartGame();
-
-        float randomDirection = Random.Range(-1.0f, 1.0f);
-        Vector3 forceDir = new Vector3(randomDirection, 1, 0);
-        forceDir.Normalize();
-        Ball.transform.SetParent(null);
-        BallRig.isKinematic = false;
-        BallRig.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
-
-        if (m_Points == 96)
-        {
-            // you win the game
-            m_GameOver = true;
-        }
-        
-        // wait until game is over
-        yield return new WaitUntil(() => m_GameOver);
-        
-        Debug.Log("Game over");
-        highScoreCompare = m_Points;
-        /*for (int i = bricks.transform.childCount - 1; i >= 0; i--)
-        {
-            Destroy(bricks.transform.GetChild(i).gameObject);
-        }*/
-        HighScore(highScoreCompare);
-
-        // wait for spacebar and then start another game
-        
-        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-        Debug.Log("Space pressed");
-        m_GameOver = false;
-
-        Debug.Log("Restarted Coroutine");
-        StartCoroutine(GameSequence());
-        yield return null;
-    }
-    public void HighScore(int compare)
-    {
-        if (highScore == 0 || highScore < compare)
-        {
-            highScore = compare;
-            highScoreName = playerName;
-            if (string.IsNullOrEmpty(highScoreName))
-            {
-                highScoreName = "Anonymous";
-            }
-        }
-        else
-        {
-            return;
-        }
-        HighScoreAndName.text = "High Score: " + highScore + "  Name: " + highScoreName;
-    }
-    public void GameOver()
-    {
-        m_GameOver = true;
-        GameOverText.text = "GAME OVER\nPress Space to Restart:";
-    }
-    public void AddPoint(int point)
-    {
-        m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
     }
     void OnSceneChanged(Scene oldScene, Scene newScene)
     {
@@ -167,6 +73,95 @@ public class MainManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(Instance);
         }
+    }
+    private void StartGame()
+    {
+        const float step = 0.6f;
+        int perLine = Mathf.FloorToInt(4.0f / step);
+
+        // place all the bricks
+        for (int i = 0; i < LineCount; ++i)
+        {
+            for (int x = 0; x < perLine; ++x)
+            {
+                Vector3 position = new Vector3(-1.5f + step * x, 2.5f + i * 0.3f, 0);
+                var brick = Instantiate(BrickPrefab, position, Quaternion.identity);
+                brick.PointValue = color[i];
+            }
+        }
+        // Set the ball in motion.
+        Ball.SetActive(true);
+        BallRig.isKinematic = true;
+        Ball.transform.position = paddle.transform.position + new Vector3(0, 0.2f, 0);
+        Ball.transform.SetParent(paddle.transform);
+    }
+    IEnumerator GameSequence()
+    {
+        GameOverText.text = " ";
+
+        // start when pressing space bar
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+        m_Points = 0;
+        ScoreText.text = $"Score : {m_Points}";
+        StartGame();
+
+        float randomDirection = Random.Range(-1.0f, 1.0f);
+        Vector3 forceDir = new Vector3(randomDirection, 1, 0);
+        forceDir.Normalize();
+        Ball.transform.SetParent(null);
+        BallRig.isKinematic = false;
+        BallRig.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+
+        if (m_Points == 96)
+        {
+            // you win the game
+            m_GameOver = true;
+        }
+        
+        // wait until game is over
+        yield return new WaitUntil(() => m_GameOver);
+        
+        highScoreCompare = m_Points;
+        for (int i = bricks.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(bricks.transform.GetChild(i).gameObject);
+        }
+        HighScore(highScoreCompare);
+
+        // wait for spacebar and then start another game
+        
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+        m_GameOver = false;
+
+        StartCoroutine(GameSequence());
+        yield return null;
+    }
+    public void HighScore(int compare)
+    {
+        if (highScore < compare)
+        {
+            highScore = compare;
+            highScoreName = playerName;
+            if (string.IsNullOrEmpty(highScoreName))
+            {
+                highScoreName = "Anonymous";
+            }
+        }
+        else
+        {
+            return;
+        }
+        HighScoreAndName.text = "High Score: " + highScore + "  Name: " + highScoreName;
+    }
+    public void GameOver()
+    {
+        m_GameOver = true;
+        GameOverText.text = "GAME OVER\nPress Space to Restart:";
+    }
+    public void AddPoint(int point)
+    {
+        m_Points += point;
+        ScoreText.text = $"Score : {m_Points}";
     }
     // use this function to assign values to the variables
     private void AssignMissing()
