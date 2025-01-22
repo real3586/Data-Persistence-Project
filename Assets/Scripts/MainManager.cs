@@ -47,6 +47,7 @@ public class MainManager : MonoBehaviour
     }
     void OnSceneChanged(Scene oldScene, Scene newScene)
     {
+        data.DeleteJSON();
         _scene = SceneManager.GetActiveScene();
         correctScene = _scene.buildIndex == 1;
         if (correctScene)
@@ -147,11 +148,11 @@ public class MainManager : MonoBehaviour
 
         // wait for spacebar and then start another game
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+
         m_GameOver = false;
         GameOverText.text = " ";
 
         StartCoroutine(GameSequence());
-        yield return null;
     }
     public void HighScore(int compare)
     {
@@ -239,6 +240,14 @@ public class MainManager : MonoBehaviour
                 }
             }
             Instance.HighScoreAndName.text = "High Score: " + Instance.highScore + "  from: " + Instance.highScoreName;
+        }
+        public void DeleteJSON()
+        {
+            string path = Application.persistentDataPath + "/savefile.json";
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
         }
     }
 }
